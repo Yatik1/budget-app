@@ -1,7 +1,8 @@
 import { Category, Transaction } from '@/types'
 import { useSQLiteContext } from 'expo-sqlite'
 import * as React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
+import TransactionsList from '../components/TransactionsList'
 
 const Home = () => {
 
@@ -12,19 +13,27 @@ const Home = () => {
     
     React.useEffect(() => {
       db.withTransactionAsync(async () => {
-        await getData()
+        await getTransactionData()
       })
     } , [db])
 
-    async function getData() {
-      const result = await db.getAllAsync(`SELECT * FROM Transactions`)
-      console.log(result)
+    async function getTransactionData() {
+      const result = await db.getAllAsync<Transaction>(
+        `SELECT * FROM Transactions ORDER BY date DESC;`
+      )
+      setTransactions(result)
     }
 
+
+
   return (
-    <View>
-      <Text>Home Screens</Text>
-    </View>
+    <ScrollView contentContainerStyle={{padding:15, paddingVertical:170}}>
+      <TransactionsList 
+        categories={categories}
+        transactions={transactions}
+        deleteTransaction={deleteTransaction}
+      />
+    </ScrollView>
   )
 }
 
