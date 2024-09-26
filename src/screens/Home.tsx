@@ -24,7 +24,12 @@ const Home = () => {
       setTransactions(result)
     }
 
-
+    async function deleteTransaction(id:number) {
+      db.withTransactionAsync(async () => {
+        await db.runAsync(`DELETE FROM Transactions WHERE id = ?;` , [id])
+        await getTransactionData()
+      })
+    }
 
   return (
     <ScrollView contentContainerStyle={{padding:15, paddingVertical:170}}>
