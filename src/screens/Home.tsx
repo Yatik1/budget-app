@@ -35,6 +35,26 @@ const Home = () => {
       )
       setCategories(categoriesResult)
 
+
+      const now = new Date()
+
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(),1)
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth()+1, 1)
+      endOfMonth.setMilliseconds(endOfMonth.getMilliseconds()-1)
+
+      const startOfMonthTimeStamp = Math.floor(startOfMonth.getTime() / 1000)
+      const endOfMonthTimeStamp = Math.floor(endOfMonth.getTime() / 1000)
+
+      const transactionsByMonth = await db.getAllAsync<TransactionsByMonth>(
+        `
+          SELECT 
+          COALESCE(SUM(CASE WHEN type = 'Expense' THEN amount ELSE 0 END),0) AS totalExpenses,
+          COALESCE(SUM(CASE WHEN type = 'Income' THEN amount ELSE 0 END),0) AS totalIncome ,
+          FROM Transactions
+          WHERE date >= ? AND date <= ?;
+        `,[startOfMonthTimeStamp , endOfMonthTimeStamp]
+      );
+      setTransactionsByMonth(transactionsByMonth[0])
     }
 
     async function deleteTransaction(id:number) {
